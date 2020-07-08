@@ -1,0 +1,336 @@
+*lovehandle.txt* *lovehandle*
+================================================================================
+
+ABOUT                                                         *lovehandle-about*
+
+Author:  Evan Gray <mailto:evanthegraty@vivaldi.net>
+Repo:    https://github.com/evanthegrayt/vim-lovehandle
+License: MIT License
+
+DEPENDENCIES                                           *lovehandle-dependencies*
+
+Lovehandle extends Tim Pope's DadBod. (https://github.com/tpope/vim-dadbod)
+
+Lovehandle assumes you open vim from the root of a project to look for
+project-specific vimrc files, and to determine the projects SQL directory. If
+you're not in this habit, I recommend installing Rooter.
+(https://github.com/airblade/vim-rooter)
+
+================================================================================
+
+TABLE OF CONTENTS                                               *lovehandle-toc*
+
+Introduction ....................... |lovehandle-introduction|
+Setup .............................. |lovehandle-setup|
+  Personal Vimrc Setup ............. |lovehandle-personal-vimrc-setup|
+  Project-specific Vimrc Setup ..... |lovehandle-project-specific-vimrc-setup|
+    SQL file path .................... |g:lovehandle_sql_directory|
+    List of handles and URLs ......... |g:lovehandle_list|
+    Default database from list ....... |g:lovehandle_default_database|
+    Silence production warning ....... |g:lovehandle_switch_confirm_production|
+    Silence LHSwitch messages ........ |g:lovehandle_switch_silently|
+Commands ........................... |lovehandle-commands|
+  Create SQL directory ............. |LHCreateSQLDir|
+  List the current database URL .... |LHList|
+  Switch the database URL .......... |LHSwitch|
+  Create or open a SQL file ........ |LHFile|
+  Generate default SQL ............. |LHGenerateSQL|
+Settings ........................... |lovehandle-settings|
+Features and Examples .............. |lovehandle-features|
+  Switching between database URLs .. |lovehandle-db-url-switching|
+  SQL files ........................ |lovehandle-sql-files|
+  Automatic Query Generation ....... |lovehandle-automatic-sql-query-generation|
+
+================================================================================
+
+INTRODUCTION                                           *lovehandle-introduction*
+
+A vim plugin that extends Tim Pope's (https://github.com/tpope) vim-dadbod
+(https://github.com/tpope/vim-dadbod) plugin to make it easier to work in
+various databases across different projects. Provides commands for easily
+switching between database URLs, creating and editing SQL files kept in
+projects, setting DB URLs based on file name and path, and generating common
+SQL queries within these files.
+
+================================================================================
+
+SETUP                                                         *lovehandle-setup*
+
+                                               *lovehandle-personal-vimrc-setup*
+Personal Vimrc Setup~
+
+This plugin was originally written to make it easier to set DB URLs for
+different projects, so it's recommended that you keep individual ".vimrc" files
+within your project's root directory. To get this to work, set the option
+'exrc' in your personal vimrc file.
+>
+    set exrc
+<
+This will source vimrc files in your current directory. If this is a concern
+for you, you can still set the options in your personal vimrc file, but it will
+be much more difficult to have project-specific database URLs and SQL
+directories.
+
+                                       *lovehandle-project-specific-vimrc-setup*
+Project Specific Vimrc Setup~
+
+These are settings you should most likely set in a project-specific vimrc file.
+You can set them in your personal vimrc file if you wish, and everything will
+work, but it'll be much more difficult to have project-specific settings.
+
+                                                    *g:lovehandle_sql_directory*
+The path where SQL files are kept. The default is "db/sql", "database/sql", or
+just "sql" if neither "db" or "database" exist.
+>
+    let g:lovehandle_sql_directory = 'db/sql'
+<
+                                                             *g:lovehandle_list*
+Two dimensional list of handles and their corresponding URLs. Handles will be
+used as an identifier when setting the URLs. They will also used for
+tab-completion. The handle names can be anything, but there's a benefit to
+sticking with the common environment names 'development', 'staging', 'beta',
+and 'production'. Read more about that in the |lovehandle-db-url-switching|
+section.
+>
+    let g:lovehandle_list = [
+            \   ['development', 'adapter://user:password@host:port/database'],
+            \   ['production',  'adapter://user:password@host:port/database'],
+            \ ]
+<
+                                                 *g:lovehandle_default_database*
+The database handle from |g:lovehandle_list| to use as the initial DB URL. If
+not set, and a "development" handle exists, it will be the default. Otherwise,
+the first element of |g:lovehandle_list| will be used. This is why
+|g:lovehandle_list| must be a 2-D list instead of a dictionary; dictionaries
+are not ordered in vim script.
+>
+    let g:lovehandle_default_database = 'development'
+<
+
+================================================================================
+
+COMMANDS                                                   *lovehandle-commands*
+
+                                                               *:LHCreateSQLDir*
+:LHCreateSQLDir [{dir}]    Create the {dir} if it doesn't exist. If {dir} is not
+                           passed, |g:lovehandle_sql_file_path| is used.
+
+                                                              *:LHCreateSQLDir!*
+:LHCreateSQLDir! [{dir}]   Same as |LHCreateSQLDir|, but silence error messages.
+
+                                                                       *:LHList*
+:LHList                    Show the handle of the current database URL.
+
+                                                                      *:LHList!*
+:LHList!                   Same as |LHList|, but also shows the actual URL.
+
+                                                                     *:LHSwitch*
+:LHSwitch [{handle}]       Switch the databaseb URL associated with {handle}. If
+                           {handle} is not passed,
+                           |g:lovehandle_default_database| is used.  When
+                           switching to a production table, you will be asked
+                           to confirm the switch.
+
+                                                                    *:LHSwitch!*
+:LHSwitch! [{handle}]      Same as |LHSwitch|, but skip production confirmation.
+
+                                                                       *:LHFile*
+:LHFile {table}            Open a SQL file for {table} in
+                           |g:lovehandle_sql_directory|.  If the file doesn't
+                           exist, it will be created and |LHGenerateSQL| will
+                           be invoked. <Tab> completion will list existing
+                           files. To open a file in a subdirectory, prepend it
+                           with a slash, i.e.  "mysql/users". A ".sql" file
+                           extension is optional; it will be automatically
+                           appended if absent.
+
+                                                                *:LHGenerateSQL*
+:LHGenerateSQL [{table}]   Generate default SQL for {table}, where {table} is
+                           the table to use. If {table} is not passed, generates
+                           based off current file name. For example, if the file
+                           name is "users.sql", SQL will be generated for the
+                           users table. Note that nothing is done to ensure
+                           {table} is a valid table name.
+
+                                                               *:LHGenerateSQL!*
+:LHGenerateSQL! [{table}]  Same as |LHGenerateSQL|, but places the text above
+                           the cursor.
+
+================================================================================
+
+FEATURES AND EXAMPLES                                      *lovehandle-features*
+
+
+                                                   *lovehandle-db-url-switching*
+Switching between database URLs for DadBod access~
+
+In your project, there should exist a vimrc file. In that file, you should
+define a 2-D list called |g:lovehandle_list|. The handles will be used as an
+identifier when setting the URLs. They will also used for tab-completion. The
+URLs should be database URLs to those databases.
+>
+    let g:lovehandle_list = [
+          \   ['testing',        'postgres://user:password@host:port/database'],
+          \   ['development',    'postgres://user:password@host:port/database'],
+          \   ['staging',        'postgres://user:password@host:port/database'],
+          \   ['production',     'postgres://user:password@host:port/database'],
+          \   ['mysql_testing',     'mysql://user:password@host:port/database'],
+          \   ['mysql_development', 'mysql://user:password@host:port/database'],
+          \   ['mysql_staging',     'mysql://user:password@host:port/database'],
+          \   ['mysql_production',  'mysql://user:password@host:port/database'],
+          \ ]
+<
+Handle names should follow the above naming convention. Note the "mysql_"
+prefix is used to match sub-directories of "sql/" and set the database URLs of
+the files accordingly. See |lovehandle-sql-files| for more details.
+
+You can define a default database by setting |g:lovehandle_default_database| in
+the project's vimrc.
+>
+    let g:lovehandle_default_database = 'development'
+<
+If |g:lovehandle_default_database| is not defined, but "development" exists as
+a handle, it will be the default database. Otherwise, the first database in the
+list will be the default. This is why we use a 2-D list instead of a
+dictionary; dictionaries are not ordered in vimscript.
+
+If your database URL contains a special character, you'll need to
+percent-encode it. For example, an octothorp (#) will need to be written as
+"%23", and spaces as "%20".
+
+If, at any time, you want to see which database is being used, use the |:LHList|
+command. If you use the naming convention previously explained, if the current
+database URL is set to a production database, it will be in red. The |:LHList!|
+version of the command will also show the actual DB URL.
+>
+    :LHList
+    "=> b:db is set to mysql
+
+    :LHList!
+    "=> b:db is set to mysql: mysql://user:password@host:port/database
+<
+Still assuming the above example list, switching DBs is now as easy as calling
+|:LHSwitch|. This feature has tab-completion, so you can use <tab> and it will
+show/cycle the options. |:LHSwitch| with no arguments will switch to
+|g:lovehandle_default_database|.
+
+If you attempt to switch to a production database, and assuming you named your
+handles correctly, you will be asked to confirm the change. To avoid this
+confirmation, use the bang version of the command.
+>
+    :LHSwitch! production
+<
+                                        *g:lovehandle_switch_confirm_production*
+To permanently disable this confirmation, set the following in your personal
+vimrc file.
+>
+    let g:lovehandle_switch_confirm_production = 0
+<
+                                                  *g:lovehandle_switch_silently*
+To permanently suppress all messages when switching DB URLs, set the following
+in your personal vimrc file.
+>
+    let g:lovehandle_switch_silently = 1
+<
+To learn about database URLs, read the help documentation for DadBod.
+>
+    :help dadbod
+<
+                                                          *lovehandle-sql-files*
+SQL files and automatic database URLs~
+
+If you find it helpful to keep commonly-used SQL queries in your project,
+you'll love this feature.
+
+In most frameworks, some kind of database directory exists. Some commone ones
+are as follows:
+>
+    | Rails   | Laravel       |
+    |---------|---------------|
+    | db/sql/ | database/sql/ |
+<
+When opened, ".sql" files in this directory will automatically be set to the
+default database -- either "development" if it exists, or the first database
+listed in |g:lovehandle_list|. If, however, the file is in a sub-directory, and
+that sub-directory matches a handle in |g:lovehandle_list|, the database URL
+will be set to that handle's URL.
+
+Assuming a Rails project's vimrc contains the following:
+>
+    let g:lovehandle_list = [
+          \   ['development',       'postgres://user@host/database'],
+          \   ['mysql_development', 'mysql://user:password@host:port/database'],
+          \ ]
+<
+A file called "db/sql/users.sql" would point to "postgres://user@host/database".
+This would also be true if the file were called "db/sql/development/users.sql".
+
+If we want the URL to point to "mysql://user:password@host:port/database", we'd
+need to call the file "db/sql/mysql_development/users.sql". If you call the
+sub-directory "mysql" instead of "mysql_development", the "_development" suffix
+will be implied.
+
+Note that you can still change the database URL with |:LHSwitch|.
+
+To open a new or existing SQL file in the directory, use |:LHFile|. To access
+files in subdirectories of |g:lovehandle_sql_directory|, prepend the directory
+to the table name.
+>
+    :LHFile users
+    :LHFile mysql/users
+<
+You can change the path to the SQL files by setting
+|g:lovehandle_sql_directory| to a string.
+>
+    let g:lovehandle_sql_directory = '/db/sql'
+<
+
+                                     *lovehandle-automatic-sql-query-generation*
+Automatic Query Generation for SQL Files~
+
+Any new or empty SQL file in |g:lovehandle_sql_directory| opened with vim will
+automatically have default queries generated in the file. It is assumed that
+the file name will be the table name to query. These queries are even adapter
+aware, which as we've learned, are based off the directory in which they
+reside. Assuming the file name is "users.sql":
+
+If the adapter is postgres, the following contents will be placed in the file:
+>
+    -- SQL for 'users' table generated by lovehandle.
+    -- Sun Feb 23 08:23:53 2020
+
+    -- List all tables in the database.
+    \dt;
+
+    -- Describe 'users' table's attributes.
+    \d users;
+
+    -- Count records in 'users'.
+    select count(*) from users;
+
+    -- List all records from the 'users' table.
+    select * from users;
+<
+If the adapter is mysql, the following contents will be placed in the file:
+>
+    -- SQL for 'users' table generated by lovehandle.
+    -- Sun Feb 23 08:23:53 2020
+
+    -- List all tables in the database.
+    show tables;
+
+    -- Describe 'users' table's attributes.
+    describe users;
+
+    -- Count records in 'users'.
+    select count(*) from users;
+
+    -- List all records from the 'users' table.
+    select * from users;
+<
+There are also commands provided for generating this sql at-will. Using the
+bang form will place text above current cursor position. Note that a database
+URL must be set.
+>
+    :LHGenerateSQL[!] [TABLE]
+<
