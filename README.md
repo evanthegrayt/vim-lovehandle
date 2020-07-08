@@ -4,14 +4,14 @@ A vim plugin that extends [Tim Pope](https://github.com/tpope)'s
 various databases across different projects. Provides commands for easily
 switching between database URLs, creating and editing SQL files kept in
 projects, setting DB URLs based on file name and path, and generating common SQL
-queries within these files.
+queries within these files. See [below](#features-and-examples) for examples.
 
 ## Table of Contents
 - [Installation](#installation)
   - [Vim with packages](#vim-with-packages)
   - [Pathogen](#pathogen)
 - [Setup](#setup)
-- [Features](#features)
+- [Features and examples](#features-and-examples)
   - [Defining handles and URLs](#defining-handles-and-urls)
   - [Switching between database URLs](#switching-between-database-urls)
   - [SQL Files and Automatic Database URLs](#sql-files-and-automatic-database-urls)
@@ -91,7 +91,7 @@ doc](https://github.com/evanthegrayt/vim-lovehandle/blob/master/doc/lovehandle.t
 :help lovehandle-project-specific-vimrc-setup
 ```
 
-## Features
+## Features and examples
 ### Defining handles and URLs
 In your project, there should exist a `.vimrc` file. In that file, you should
 define a two-dimensional list called `g:lovehandle_list`. The handles will be
