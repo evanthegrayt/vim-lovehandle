@@ -256,9 +256,9 @@ must be set.
 ## Dependencies and Recommended Plugins
 Lovehandles was originall written around
 [DadBod](https://github.com/tpope/vim-dadbod), so it sets variables specific to
-that plugin. However, you can use plugin that can communicate with a database.
-You may just have to change the variables it uses for database URLs (`g:db` and
-`b:db`).
+that plugin. However, you can use any plugin that can communicate with a
+database.  You may just have to change the variables it uses for database URLs
+(`g:db` and `b:db`).
 
 LoveHandle assumes you open vim from the root of a project to look for
 project-specific vimrc files, and to determine the projects SQL directory. If
