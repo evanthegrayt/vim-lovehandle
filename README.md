@@ -6,20 +6,6 @@ switching between database URLs, creating and editing SQL files kept in
 projects, setting DB URLs based on file name and path, and generating common SQL
 queries within these files. See [below](#features-and-examples) for examples.
 
-## Table of Contents
-- [Installation](#installation)
-  - [Vim with packages](#vim-with-packages)
-  - [Pathogen](#pathogen)
-- [Setup](#setup)
-- [Features and examples](#features-and-examples)
-  - [Defining handles and URLs](#defining-handles-and-urls)
-  - [Switching between database URLs](#switching-between-database-urls)
-  - [SQL Files and Automatic Database URLs](#sql-files-and-automatic-database-urls)
-  - [Automatic Query Generation for SQL Files](#automatic-query-generation-for-sql-files)
-- [Dependencies and Recommended Plugins](#dependencies-and-recommended-plugins)
-- [Issues and Feature Requests](#issues-and-feature-requests)
-- [Self-Promotion](#self-promotion)
-
 ## Installation
 ### Vim with packages
 Clone the repository in your `pack` directory. Note, `evanthegrayt/` is
@@ -83,9 +69,9 @@ to have project-specific settings, but you could accomplish similar behavior
 via conditionals.
 
 You will also need to set a few variables in the project-specific `.vimrc`.
-These will be convered in the upcoming sections. You can read more in-depth in
+These will be covered in the upcoming sections. You can read more in-depth in
 the [official vim help
-doc](https://github.com/evanthegrayt/vim-lovehandle/blob/master/doc/lovehandle.txt#L70).
+doc](https://github.com/evanthegrayt/vim-lovehandle/blob/master/doc/lovehandle.txt#L59).
 
 ```
 :help lovehandle-project-specific-vimrc-setup
@@ -100,7 +86,7 @@ tab-completion. The values should be database URLs to those databases. Here's an
 example:
 
 ```vim
-" Obviously, in a real-world example, all the URls would be different.
+" Obviously, in a real-world example, all the URLs would be different.
 let g:lovehandle_list = [
       \   ['testing',         'postgres://user:password@host:port/database'],
       \   ['development',     'postgres://user:password@host:port/database'],
@@ -254,7 +240,7 @@ must be set.
 ```
 
 ## Dependencies and Recommended Plugins
-Lovehandles was originall written around
+Lovehandles was originally written around
 [DadBod](https://github.com/tpope/vim-dadbod), so it sets variables specific to
 that plugin. However, you can use any plugin that can communicate with a
 database.  You may just have to change the variables it uses for database URLs
