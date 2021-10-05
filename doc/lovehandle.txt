@@ -119,10 +119,8 @@ COMMANDS                                                   *lovehandle-commands*
 :LHCreateSQLDir! [{dir}]   Same as |LHCreateSQLDir|, but silence error messages.
 
                                                                        *:LHList*
-:LHList                    Show the handle of the current database URL.
-
-                                                                      *:LHList!*
-:LHList!                   Same as |LHList|, but also shows the actual URL.
+:LHList                    Show the handle of the current database URL. Call
+                           with |:verbose| to show actual URL.
 
                                                                      *:LHSwitch*
 :LHSwitch [{handle}]       Switch the databaseb URL associated with {handle}. If
@@ -200,13 +198,13 @@ percent-encode it. For example, an octothorp (#) will need to be written as
 
 If, at any time, you want to see which database is being used, use the |:LHList|
 command. If you use the naming convention previously explained, if the current
-database URL is set to a production database, it will be in red. The |:LHList!|
-version of the command will also show the actual DB URL.
+database URL is set to a production database, it will be in red. Calling with
+|:verbose| will also show the actual DB URL.
 >
     :LHList
     "=> b:db is set to mysql
 
-    :LHList!
+    :verbose LHList
     "=> b:db is set to mysql: mysql://user:password@host:port/database
 <
 Still assuming the above example list, switching DBs is now as easy as calling

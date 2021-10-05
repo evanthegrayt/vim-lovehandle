@@ -116,14 +116,14 @@ the *buffer*).
 
 If, at any time, you want to see which database is being used, use the `:LHList`
 command. If you use the naming convention previously explained, if the current
-DB URL is set to a production database, it will be in red. The `LHList!` version
-of the command will also show the actual DB URL.
+DB URL is set to a production database, it will be in red. Calling with
+`:verbose` will also show the actual DB URL.
 
 ```
 :LHList
 "=> b:db is set to development
 
-:LHList!
+:verbose LHList!
 "=> b:db is set to development: 'postgres://user:password@host:port/database'
 ```
 

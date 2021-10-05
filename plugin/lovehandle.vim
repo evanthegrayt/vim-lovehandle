@@ -23,16 +23,17 @@ endif
 ""
 " Provide a command to call the switch db function.
 " If no arg is passed, defaults to g:lovehandle_default_database.
+" If ! is passed, silence production warning.
 " Example: `:LHSwitch test`
 "       => Switching to test database: postgres://postgres:password@db/fasttrac_test
 command! -bang -nargs=? -complete=custom,lovehandle#ListCompletions
       \ LHSwitch call lovehandle#DBSwitch(<bang>0, <f-args>)
 
 ""
-" Provide a command to show the current db url. Add ! to show actual URL
+" Provide a command to show the current db url. Call with :verbose to show URL
 " Example: `:LHList!`
 "       => g:db is set to development: postgres://user@host/database
-command! -bang LHList call lovehandle#DBList(<bang>0)
+command! LHList call lovehandle#DBList()
 
 ""
 " Open database file.

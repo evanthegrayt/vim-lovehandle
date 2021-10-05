@@ -12,7 +12,7 @@ let s:DescribeTablesDictionary = {
 ""
 " List which database the b:db or g:db url points to. If ! is used, Also show
 " the actual URL.
-function! lovehandle#DBList(show_url) abort
+function! lovehandle#DBList() abort
   if !s:validate() | return | endif
 
   let l:db = lovehandle#GetURL()
@@ -20,7 +20,7 @@ function! lovehandle#DBList(show_url) abort
   for [l:key, l:value] in g:lovehandle_list
     if l:value ==# l:db
       let l:string = lovehandle#GetDBVar() . ' is set to ' . l:key
-      if a:show_url | let l:string .= ': ' . l:db | endif
+      if &verbose | let l:string .= ': ' . l:db | endif
 
       if match(l:key, 'production') >= 0
         call lovehandle#Warn(l:string)
