@@ -23,18 +23,18 @@ TABLE OF CONTENTS                                               *lovehandle-toc*
 Introduction ....................... |lovehandle-introduction|
 Setup .............................. |lovehandle-setup|
   Personal Vimrc Setup ............. |lovehandle-personal-vimrc-setup|
-  Project-specific Vimrc Setup ..... |lovehandle-project-specific-vimrc-setup|
-    SQL file path .................... |g:lovehandle_sql_directory|
-    List of handles and URLs ......... |g:lovehandle_list|
-    Default database from list ....... |g:lovehandle_default_database|
-    Silence production warning ....... |g:lovehandle_switch_confirm_production|
-    Silence LHSwitch messages ........ |g:lovehandle_switch_silently|
+  Project-specific Setup ........... |lovehandle-project-specific-setup|
+    SQL file path .................. |g:lovehandle_sql_directory|
+    List of handles and URLs ....... |g:lovehandle_list|
+    Default database from list ..... |g:lovehandle_default_database|
+    Silence production warning ..... |g:lovehandle_switch_confirm_production|
+    Silence LHSwitch messages ...... |g:lovehandle_switch_silently|
 Commands ........................... |lovehandle-commands|
-  Create SQL directory ............. |LHCreateSQLDir|
-  List the current database URL .... |LHList|
-  Switch the database URL .......... |LHSwitch|
-  Create or open a SQL file ........ |LHFile|
-  Generate default SQL ............. |LHGenerateSQL|
+  Create SQL directory ............. |:LHCreateSQLDir|
+  List the current database URL .... |:LHList|
+  Switch the database URL .......... |:LHSwitch|
+  Create or open a SQL file ........ |:LHFile|
+  Generate default SQL ............. |:LHGenerateSQL|
 Settings ........................... |lovehandle-settings|
 Features and Examples .............. |lovehandle-features|
   Switching between database URLs .. |lovehandle-db-url-switching|
@@ -56,27 +56,78 @@ SQL queries within these files.
 
 SETUP                                                         *lovehandle-setup*
 
-                                               *lovehandle-personal-vimrc-setup*
-Personal Vimrc Setup~
+                                                     *lovehandle-personal-setup*
+Personal Setup~
 
-This plugin was originally written to make it easier to set DB URLs for
-different projects, so it's recommended that you keep individual ".vimrc" files
-within your project's root directory. To get this to work, set the option
-'exrc' in your personal vimrc file.
+This plugin was written to make it easier to set DB URLs for different
+projects.  Because of this, it's helpful to have a different set of variables
+defined for each project. There are several ways to accomplish this. Note that
+the variables referenced in this section will be covered in the
+|lovehandle-project-specific-setup| section.
+
+First, it's worth noting that if you set 'exrc', you can just set the variables
+in the project's local ".vimrc" file. This option is not recommended. For
+reasoning, see the |'exrc'| help documentation.
+
+                                                         *g:lovehandle_projects*
+If you like the idea of keeping a local ".vimrc" (or other file name) in each
+project so that team members will have the same config, but don't want to set
+'exrc', you can define a dictionary with the key/value pairs being the directory
+of the project and the file to source for that project. Note that the keys must
+be full paths to the directory, with no slash at the end.
+
 >
-    set exrc
+    let g:lovehandle_projects = {
+        \   '/home/me/project_one': '.vimrc',
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
 <
-This will source vimrc files in your current directory. If this is a concern
-for you, you can still set the options in your personal vimrc file, but it will
-be much more difficult to have project-specific database URLs and SQL
-directories.
 
-                                       *lovehandle-project-specific-vimrc-setup*
-Project Specific Vimrc Setup~
+If you prefer not to create a file in the project, or aren't able to do so, the
+values can be set via a sub-dictionary, with the key/value pairs being the
+variable to set (minus the "g:lovehandle_" prefix) and the variable's value.
 
-These are settings you should most likely set in a project-specific vimrc file.
-You can set them in your personal vimrc file if you wish, and everything will
-work, but it'll be much more difficult to have project-specific settings.
+>
+    let g:lovehandle_projects = {
+        \   '/home/me/project_one': {
+        \     'list': [
+        \       ['development', 'postgres://user:password@host:port/database'],
+        \       ['staging', 'postgres://user:password@host:port/database']
+        \     ],
+        \     'sql_directory': 'db/sql',
+        \     'default_database': 'development',
+        \     'switch_confirm_production': 1,
+        \     'switch_silently': 0
+        \   },
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
+<
+
+If you want to source a project's local vimrc, but also override some of the
+variables, you can add a "file" key to the project's sub-dictionary. The file
+will be sourced first, and then the remaining variables in the dictionary will
+be (re)set.
+
+>
+    let g:lovehandle_projects = {
+        \   '/home/me/project_one': {
+        \     'sql_directory': 'db/sql',
+        \     'switch_confirm_production': 1,
+        \     'switch_silently': 0,
+        \     'file': '.vimrc'
+        \   },
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
+<
+
+                                             *lovehandle-project-specific-setup*
+Project Specific Setup~
+
+This section defines the variables to configure for the plugin to work properly.
+They should be defined for each project, either in the file to be sourced for
+that project, or in the project's sub-dictionary of `g:lovehandle_projects`.
+It's worth noting that |g:lovehandle_list| is the only required variable, as
+the rest have defaults.
 
                                                     *g:lovehandle_sql_directory*
 The path where SQL files are kept. The default is "db/sql", "database/sql", or
@@ -112,25 +163,21 @@ are not ordered in vim script.
 COMMANDS                                                   *lovehandle-commands*
 
                                                                *:LHCreateSQLDir*
-:LHCreateSQLDir [{dir}]    Create the {dir} if it doesn't exist. If {dir} is not
-                           passed, |g:lovehandle_sql_file_path| is used.
-
-                                                              *:LHCreateSQLDir!*
-:LHCreateSQLDir! [{dir}]   Same as |LHCreateSQLDir|, but silence error messages.
+:LHCreateSQLDir[!] [{dir}] Create the {dir} if it doesn't exist. If {dir} is not
+                           passed, |g:lovehandle_sql_file_path| is used. If ! is
+                           provided, error messages will be silenced.
 
                                                                        *:LHList*
 :LHList                    Show the handle of the current database URL. Call
                            with |:verbose| to show actual URL.
 
                                                                      *:LHSwitch*
-:LHSwitch [{handle}]       Switch the databaseb URL associated with {handle}. If
+:LHSwitch[!] [{handle}]    Switch the databaseb URL associated with {handle}. If
                            {handle} is not passed,
                            |g:lovehandle_default_database| is used.  When
                            switching to a production table, you will be asked
-                           to confirm the switch.
-
-                                                                    *:LHSwitch!*
-:LHSwitch! [{handle}]      Same as |LHSwitch|, but skip production confirmation.
+                           to confirm the switch. If the ! is used, the
+                           production confirmation will be skipped.
 
                                                                        *:LHFile*
 :LHFile {table}            Open a SQL file for {table} in
@@ -143,16 +190,18 @@ COMMANDS                                                   *lovehandle-commands*
                            appended if absent.
 
                                                                 *:LHGenerateSQL*
-:LHGenerateSQL [{table}]   Generate default SQL for {table}, where {table} is
+:LHGenerateSQL[!] [{table}]
+                           Generate default SQL for {table}, where {table} is
                            the table to use. If {table} is not passed, generates
                            based off current file name. For example, if the file
                            name is "users.sql", SQL will be generated for the
                            users table. Note that nothing is done to ensure
-                           {table} is a valid table name.
+                           {table} is a valid table name. If ! is provided, the
+                           text will be placed above the cursor.
 
-                                                               *:LHGenerateSQL!*
-:LHGenerateSQL! [{table}]  Same as |LHGenerateSQL|, but places the text above
-                           the cursor.
+                                                                    *:LHReload!*
+:LHReload [{file}]         Reload the plugin. If {file} is provided, that file
+                           will be sourced.
 
 ================================================================================
 

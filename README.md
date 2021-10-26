@@ -1,13 +1,19 @@
 # LoveHandle
 A vim plugin that extends [Tim Pope](https://github.com/tpope)'s
 [vim-dadbod](https://github.com/tpope/vim-dadbod) to make it easier to work in
-various databases across different projects. Provides commands for easily
+various databases across different projects. It provides commands for easily
 switching between database URLs, creating and editing SQL files kept in
 projects, setting DB URLs based on file name and path, and generating common SQL
-queries within these files. See [below](#features-and-examples) for examples.
+queries within these files. See [below](#usage) for examples.
+
+Note that this guide is helpful to get started and understand what the plugin
+does, but should you install this plugin, please read the authoritative
+documentation (`:help lovehandle`) after generating helptags.
 
 ## Installation
-### Vim with packages
+I recommend installing a modern version of vim (8.0+) and using its built-in
+packages system (`:help packages`).
+
 Clone the repository in your `pack` directory. Note, `evanthegrayt/` is
 used as the package directory in this example, but you can put it in whichever
 package directory you want.
@@ -23,75 +29,93 @@ Don't forget the documentation. Run `:helptags` on the `doc/` directory. Or, to
 update all your plugins' documentation:
 
 ```
+:helptags ~/.vim/pack/evanthegrayt/start/vim-lovehandle/doc
+" OR
 :helptags ALL
 ```
 
-### Pathogen
-Clone the repository in `.vim/bundle`.
+## Initial Setup
+This plugin was written to make it easier to set DB URLs for different projects.
+Because of this, it's helpful to have a different set of variables defined for
+each project. There are several ways to accomplish this. Note that the variables
+referenced in this section will be covered in the [next
+section](#project-specific-setup).
 
-```sh
-git clone https://github.com/evanthegrayt/vim-lovehandle.git \
-    ~/.vim/bundle/vim-lovehandle
-```
+First, it's worth noting that if you `set exrc`, you can just set the variables
+in the project's local `.vimrc` file. This option is **not** recommended. For
+reasoning, see `:help 'exrc'`.
 
-Don't forget the documentation. Run `:helptags` on the `doc/` directory. Or, to
-update all your plugins' documentation:
 
-```
-:Helptags
-```
-
-## Setup
-This plugin was originally written to make it easier to set DB URLs for
-different projects, so it's recommended that you keep individual `.vimrc` files
-within your project's root directory. To get this to work, set the option
-`exrc` in your personal vimrc file.
+If you like the idea of keeping a local `.vimrc` (or other file name) in each
+project so that team members will have the same config, but don't want to `set
+exrc`, you can define a dictionary with the key/value pairs being the directory
+of the project and the file to source for that project. Note that the keys must
+be full paths to the directory, with no slash at the end.
 
 ```vim
-""
-" Set in your personal ~/.vimrc or ~/.vim/vimrc file!
-set exrc
+let g:lovehandle_projects = {
+        \   '/home/me/project_one': '.vimrc',
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
 ```
 
-The rest of this guide will assume you're using this method. Doing so will
-source `.vimrc` files in your current directory. If this concerns you, read
-about `:help secure` and consider setting that option as well.
+If you prefer not to create a file in the project, or aren't able to do so, the
+values can be set via a sub-dictionary, with the key/value pairs being the
+variable to set (minus the `g:lovehandle_` prefix) and the variable's value.
 
 ```vim
-""
-" Set in your personal ~/.vimrc or ~/.vim/vimrc file!
-set secure
+let g:lovehandle_projects = {
+        \   '/home/me/project_one': {
+        \     'list': [
+        \       ['development', 'postgres://user:password@host:port/database'],
+        \       ['staging', 'postgres://user:password@host:port/database']
+        \     ],
+        \     'sql_directory': 'db/sql',
+        \     'default_database': 'development',
+        \     'switch_confirm_production': 1,
+        \     'switch_silently': 0
+        \   },
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
 ```
 
-If you still don't want to use project-specific vimrc files, you can still set
-the options in your personal `~/.vimrc` file. This will be much more difficult
-to have project-specific settings, but you could accomplish similar behavior
-via conditionals.
+If you want to source a project's local vimrc, but also override some of the
+variables, you can add a `'file'` key to the project's sub-dictionary. The file
+will be sourced first, and then the remaining variables in the dictionary will
+be (re)set.
 
-You will also need to set a few variables in the project-specific `.vimrc`.
-These will be covered in the upcoming sections. You can read more in-depth in
-the [official vim help
-doc](https://github.com/evanthegrayt/vim-lovehandle/blob/master/doc/lovehandle.txt#L59).
-
+```vim
+let g:lovehandle_projects = {
+        \   '/home/me/project_one': {
+        \     'sql_directory': 'db/sql',
+        \     'switch_confirm_production': 1,
+        \     'switch_silently': 0,
+        \     'file': '.vimrc'
+        \   },
+        \   '/home/me/project_two': '.lovehandle.vim'
+        \ }
 ```
-:help lovehandle-project-specific-vimrc-setup
-```
 
-## Features and examples
+## Project-Specific Setup
+This section defines the variables to configure for the plugin to work properly.
+They should be defined for each project, either in the file to be sourced for
+that project, or in the project's sub-dictionary of `g:lovehandle_projects`.
+It's worth noting that `g:lovehandle_list` is the only required variable, as the
+rest have defaults.
+
 ### Defining handles and URLs
-In your project, there should exist a `.vimrc` file. In that file, you should
-define a two-dimensional list called `g:lovehandle_list`. The handles will be
-used as an identifier when setting the URLs. They will also used for
-tab-completion. The values should be database URLs to those databases. Here's an
-example:
+You will need to define a two-dimensional list called `g:lovehandle_list`. The
+handles will be used as an identifier when setting the URLs. They will also be
+used for tab-completion. The values should be database URLs to those databases.
+Here's an example:
 
 ```vim
 " Obviously, in a real-world example, all the URLs would be different.
 let g:lovehandle_list = [
-      \   ['testing',         'postgres://user:password@host:port/database'],
-      \   ['development',     'postgres://user:password@host:port/database'],
-      \   ['staging',         'postgres://user:password@host:port/database'],
-      \   ['production',      'postgres://user:password@host:port/database'],
+      \   ['testing', 'postgres://user:password@host:port/database'],
+      \   ['development', 'postgres://user:password@host:port/database'],
+      \   ['staging', 'postgres://user:password@host:port/database'],
+      \   ['production', 'postgres://user:password@host:port/database'],
       \ ]
 ```
 
@@ -112,8 +136,12 @@ dictionaries are not ordered in vimscript.
 
 It's important to note, when setting the default URL, `g:db` will be set
 (global). Any time a URL is changed after that, it will be set `b:db` (local to
-the *buffer*).
+the *buffer*). There's currently [an open
+issue](https://github.com/evanthegrayt/vim-lovehandle/issues/4) to be able to
+customize this behavior, so feel free to leave your thoughts in a comment.
 
+## Usage
+### Listing current and available handles
 If, at any time, you want to see which database is being used, use the `:LHList`
 command. If you use the naming convention previously explained, if the current
 DB URL is set to a production database, it will be in red. Calling with
@@ -123,7 +151,7 @@ DB URL is set to a production database, it will be in red. Calling with
 :LHList
 "=> b:db is set to development
 
-:verbose LHList!
+:verbose LHList
 "=> b:db is set to development: 'postgres://user:password@host:port/database'
 ```
 
@@ -141,13 +169,25 @@ confirmation, use the bang version of the command.
 :LHSwitch! production
 ```
 
-To learn about database URLs, read the [help
+To disable the confirmation permanently, the following can be set.
+
+```vim
+let g:lovehandle_switch_confirm_production = 0
+```
+
+To silence the "Switching to X database" message when switching, the following
+can be set.
+
+```vim
+let g:lovehandle_switch_silently = 1
+```
+
+Tip: To learn about database URLs, read the [help
 documentation](https://github.com/tpope/vim-dadbod/blob/master/doc/dadbod.txt)
 for `DadBod`.
 
 ### SQL Files and Automatic Database URLs
-If you find it helpful to keep commonly-used SQL queries in your project, you'll
-love this feature.
+This feature is for people who keep commonly-used SQL queries in their projects.
 
 You can define a directory for storing SQL files (with `.sql` extension) by
 setting `g:lovehandle_sql_directory` to a string.
@@ -186,7 +226,7 @@ need to call the file `db/sql/mysql_development/users.sql`. If you call the
 sub-directory `mysql` instead of `mysql_development`, the `_development` suffix
 will be implied.
 
-Note that you can still change the database URL anytime with `LHSwitch`.
+Note that you can still change the database URL anytime with `:LHSwitch`.
 
 ### Automatic Query Generation for SQL Files
 Any new or empty `db/sql/**/*.sql` file opened with vim will automatically have
@@ -196,6 +236,7 @@ learned, are based off the directory in which they reside. Assuming the file
 name is `users.sql`:
 
 If the adapter is postgres, the following contents will be placed in the file:
+
 ```sql
 -- SQL for 'users' table generated by lovehandle.
 -- Sun Feb 23 08:23:53 2020
@@ -214,6 +255,7 @@ SELECT * FROM users;
 ```
 
 If the adapter is mysql, the following contents will be placed in the file:
+
 ```sql
 -- SQL for 'users' table generated by lovehandle.
 -- Sun Feb 23 08:23:53 2020
