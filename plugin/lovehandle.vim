@@ -6,39 +6,31 @@ if exists('g:lovehandle_loaded') || &cp
 endif
 let g:lovehandle_loaded = 1
 
-""
-" IF the user hasn't defined which table is the default, assume 'development'.
-if !exists('g:lovehandle_default_database')
-  let g:lovehandle_default_database = 'development'
-endif
-
-""
-" If g:db isn't set, but g:lovehandle_list is, set g:db to
-" g:lovehandle_default_database. If that key doesn't exist, set g:db to the
-" first db in the list.
-if !exists('g:db') && exists('g:lovehandle_list')
-  let g:db = lovehandle#FindDBByKey(g:lovehandle_default_database, 0, g:lovehandle_list[0][1])
-endif
+call lovehandle#Init()
 
 ""
 " Provide a command to call the switch db function.
 " If no arg is passed, defaults to g:lovehandle_default_database.
 " If ! is passed, silence production warning.
 " Example: `:LHSwitch test`
-"       => Switching to test database: postgres://postgres:password@db/fasttrac_test
+"       => Switching to test database: postgres://postgres:password@host/database
 command! -bang -nargs=? -complete=custom,lovehandle#ListCompletions
-      \ LHSwitch call lovehandle#DBSwitch(<bang>0, <f-args>)
+      \ LHSwitch call lovehandle#Switch(<bang>0, <f-args>)
 
 ""
 " Provide a command to show the current db url. Call with :verbose to show URL
 " Example: `:LHList!`
 "       => g:db is set to development: postgres://user@host/database
-command! LHList call lovehandle#DBList()
+command! LHList call lovehandle#List()
 
 ""
 " Open database file.
 command! -nargs=+ -complete=custom,lovehandle#FileCompletion
       \ LHFile call lovehandle#File(<f-args>)
+
+""
+" Reload the configuration.
+command! -nargs=? -complete=file LHReload call lovehandle#Init(<f-args>)
 
 ""
 " Creates the SQL dir.
