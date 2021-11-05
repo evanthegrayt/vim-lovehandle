@@ -129,7 +129,7 @@ function! lovehandle#GenerateSQL(place_above_cursor, ...) abort
         \   s:Sql[l:adapter].describe . ' ' . l:table . ';',
         \   '',
         \   "-- Count records in '" . l:table . "'.",
-        \   'SELECT count(*) FROM ' . l:table . ';',
+        \   'SELECT count(1) FROM ' . l:table . ';',
         \   '',
         \   "-- List all records from the '" . l:table . "' table.",
         \   'SELECT * FROM ' . l:table . ';',

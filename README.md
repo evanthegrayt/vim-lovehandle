@@ -248,7 +248,7 @@ If the adapter is postgres, the following contents will be placed in the file:
 \d users;
 
 -- Count records in 'users'.
-SELECT count(*) FROM users;
+SELECT count(1) FROM users;
 
 -- List all records from the 'users' table.
 SELECT * FROM users;
@@ -267,7 +267,7 @@ show tables;
 describe users;
 
 -- Count records in 'users'.
-SELECT count(*) FROMusers;
+SELECT count(1) FROM users;
 
 -- List all records from the 'users' table.
 SELECT * FROM users;
