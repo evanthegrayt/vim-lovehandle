@@ -102,6 +102,7 @@ endfunction
 ""
 " Opens/creates a sql file.
 function! lovehandle#File(table) abort
+  if !lovehandle#Validate() | return | endif
   let l:dir = lovehandle#GetSQLDirectory()
   call lovehandle#CreateSQLDir(1)
   let l:file = l:dir . a:table

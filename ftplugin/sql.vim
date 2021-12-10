@@ -1,3 +1,7 @@
+if !exists('g:lovehandle_list') || get(g:, 'lovehandle_autofill_sql_files', 1) == 0
+  finish
+endif
+
 let s:lovehandle_sql_directory = lovehandle#GetSQLDirectory()
 let s:dir_name = fnamemodify(resolve(expand('%:p')), ':h') . '/'
 
