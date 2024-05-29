@@ -14,7 +14,6 @@ let s:Sql = {
 
 ""
 " Sets the inital 'g:db' if possible.
-" TODO: We should probably still load the hash etc even if they pass a file.
 function! lovehandle#Init(...)
   if a:0
     let l:file = a:1
