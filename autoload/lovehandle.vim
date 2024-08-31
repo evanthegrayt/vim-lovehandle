@@ -219,20 +219,19 @@ endfunction
 " Sources the local vimrc or user-defined file.
 function! s:SourceLocalVimrc(file) abort
   if !filereadable(a:file)
-    call lovehandle#Warn(a:file . " does not exist.")
-    return
+    return lovehandle#Warn(a:file . " does not exist.")
   endif
   execute 'source' a:file
 endfunction
 
 ""
-" Returns the adapter from URL.
+" The adapter from URL.
 function! s:GetAdapter() abort
   return split(s:GetUrl(), ':')[0]
 endfunction
 
 ""
-" Returns the current value of b:db, or g:db.
+" The current value of b:db, or g:db.
 function! s:GetUrl() abort
   for l:var in ['b:db', 'g:db']
     if exists(l:var) | return eval(l:var) | endif
@@ -240,7 +239,7 @@ function! s:GetUrl() abort
 endfunction
 
 ""
-" Returns the current b:db, or g:db.
+" The current b:db, or g:db.
 function! s:GetDBVar() abort
   for l:var in ['b:db', 'g:db']
     if exists(l:var) | return l:var | endif

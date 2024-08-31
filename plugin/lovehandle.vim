@@ -7,6 +7,10 @@ endif
 let g:lovehandle_loaded = 1
 
 call lovehandle#Init()
+augroup lovehandle
+  autocmd!
+  autocmd VimEnter,DirChanged * call lovehandle#Init()
+augroup END
 
 ""
 " Provide a command to call the switch db function.
