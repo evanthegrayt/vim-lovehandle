@@ -353,7 +353,7 @@ If the adapter is postgres, the following contents will be placed in the file:
     \d users;
 
     -- Count records in 'users'.
-    select count(*) from users;
+    select count(1) from users;
 
     -- List all records from the 'users' table.
     select * from users;
@@ -370,7 +370,7 @@ If the adapter is mysql, the following contents will be placed in the file:
     describe users;
 
     -- Count records in 'users'.
-    select count(*) from users;
+    select count(1) from users;
 
     -- List all records from the 'users' table.
     select * from users;

@@ -23,7 +23,9 @@ command! -bang -nargs=? -complete=custom,lovehandle#ListCompletions
 
 ""
 " Provide a command to show the current db url. Call with :verbose to show URL
-" Example: `:LHList!`
+" Example: `:LHList`
+"       => g:db is set to development
+"          `:verbose LHList`
 "       => g:db is set to development: postgres://user@host/database
 command! LHList call lovehandle#List()
 
