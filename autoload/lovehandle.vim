@@ -12,6 +12,14 @@ let s:Sql = {
       \   }
       \ }
 
+let s:Variables = [
+      \   'list',
+      \   'sql_directory',
+      \   'default_database',
+      \   'switch_silently',
+      \   'switch_confirm_production'
+      \ ]
+
 ""
 " Sets the inital 'g:db' if possible.
 function! lovehandle#Init(...)
@@ -252,35 +260,22 @@ endfunction
 ""
 " Confirm if the user is sure they want to switch to production.
 function! s:ConfirmProduction() abort
-  if exists('g:lovehandle_switch_confirm_production') &&
-        \ !g:lovehandle_switch_confirm_production
+  if !get(g:, 'lovehandle_switch_confirm_production', 1)
     return 1
   endif
   return confirm(
-        \ 'PRODUCTION, ARE YOU SURE?', "&Yes\n&No\n&Cancel", 2, 'Question'
+        \   'PRODUCTION, ARE YOU SURE?', "&Yes\n&No\n&Cancel", 2, 'Question'
         \ )
 endfunction
 
 function! s:SetVariables(dict) abort
-  if has_key(a:dict, 'list')
-    let g:lovehandle_list = a:dict.list
-  endif
-  if has_key(a:dict, 'sql_directory')
-    let g:lovehandle_sql_directory = a:dict.sql_directory
-  endif
-  if has_key(a:dict, 'default_database')
-    let g:lovehandle_default_database = a:dict.default_database
-  endif
-  if has_key(a:dict, 'switch_confirm_production')
-    let g:lovehandle_switch_confirm_production =
-          \ a:dict.switch_confirm_production
-  endif
-  if has_key(a:dict, 'switch_silently')
-    let g:lovehandle_switch_silentlydefault_database =
-          \ a:dict.switch_silentlydefault_database
-  endif
+  for key in s:Variables
+    if has_key(a:dict, key)
+      execute 'let g:lovehandle_' . key . ' = a:dict.' . key
+    endif
+  endfor
 endfunction
 
 function! s:ShouldPrintSwitchMessage() abort
-  return !exists('g:lovehandle_switch_silently') || !g:lovehandle_switch_silently
+  return !get(g:, 'lovehandle_switch_silently')
 endfunction
