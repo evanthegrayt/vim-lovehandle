@@ -1,4 +1,4 @@
-if !exists('g:lovehandle_list') || get(g:, 'lovehandle_autofill_sql_files', 1) == 0
+if !exists('g:lovehandle_list') || !get(g:, 'lovehandle_autofill_sql_files', 1)
   finish
 endif
 
